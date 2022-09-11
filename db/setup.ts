@@ -24,14 +24,17 @@ const interviewers = [
   {
     name: "Nicolas",
     email: "nicolas@email.com",
+    companyId: 2,
   },
   {
     name: "Ed",
     email: "ed@email.com",
+    companyId: 2,
   },
   {
     name: "Dafina",
     email: "dafina@email.com",
+    companyId: 3,
   },
 ];
 
@@ -85,6 +88,20 @@ const interviews = [
     interviewerId: 2,
   },
 ];
+const companies = [
+  {
+    name: "Meta",
+    city: "Menlo Park",
+  },
+  {
+    name: "Hoxton Academy",
+    city: "London",
+  },
+  {
+    name: "Moneta",
+    city: "Prishtinë",
+  },
+];
 
 const dropApplicantsTable = db.prepare(`
 DROP TABLE IF EXISTS applicants;
@@ -106,6 +123,24 @@ INSERT INTO applicants (name, email) VALUES (@name, @email)
 for (let applicant of applicants) createApplicant.run(applicant);
 // const createInterviewsTable = db.prepare(``);
 // const createInterview = db.prepare(``);
+const dropCompaniesTable = db.prepare(`
+DROP TABLE IF EXISTS companies;
+`);
+dropCompaniesTable.run();
+const createCompaniesTable = db.prepare(`
+CREATE TABLE IF NOT EXISTS companies (
+    id INTEGER,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    PRIMARY KEY (id)
+)
+`);
+createCompaniesTable.run();
+const createCompany = db.prepare(`
+INSERT INTO companies (name, city) VALUES (@name, @city)
+`);
+for (let company of companies) createCompany.run(company);
+
 const dropInterviewersTable = db.prepare(`
 DROP TABLE IF EXISTS interviewers
 `);
@@ -115,11 +150,14 @@ CREATE TABLE IF NOT EXISTS interviewers (
     id INTEGER,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
+    companyId INTEGER NOT NULL,
+    FOREIGN KEY (companyId) REFERENCES companies (id) ON DELETE CASCADE
+
     PRIMARY KEY (id)
 )`);
 createInterviewersTable.run();
 const createInterviewer = db.prepare(`
-INSERT INTO interviewers (name, email) VALUES (@name, @email)
+INSERT INTO interviewers (name, email, companyId) VALUES (@name, @email, @companyId)
 `);
 for (let interviewer of interviewers) createInterviewer.run(interviewer);
 
